@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CreateJS export from dream</title>
+
+<script src="http://code.createjs.com/easeljs-0.6.0.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.4.0.min.js"></script>
+<script src="http://code.createjs.com/movieclip-0.6.0.min.js"></script>
+<script src="http://code.createjs.com/preloadjs-0.3.0.min.js"></script>
+<script src="dream.js"></script>
+<script src="Enemy.js"></script>
+<script src="Heart.js"></script>
+
+<script>
+
+var KEYCODE_LEFT = 37,
+    KEYCODE_RIGHT = 39,
+    KEYCODE_UP = 38,
+    KEYCODE_DOWN = 40,
+    NONE_PRESSED = 0;
+    
+var lastkeyPressed;
+var canvas, stage, exportRoot;
+var e1, h1;
+var player;
+
+function init() {
+	canvas = document.getElementById("canvas");
+	images = images||{};
+    
+	var manifest = [
+                    {src:"images/bg.png", id:"bg"},
+                    {src:"images/gui_heart.png", id:"gui_heart"},
+                    {src:"images/gui_pill.png", id:"gui_pill"},
+                    {src:"images/novo_bg.png", id:"novo_bg"},
+                    {src:"images/player.png", id:"player"},
+                    {src:"images/untitled_icon.png", id:"untitled_icon"}
+                    ];
+                    
+    var loader = new createjs.LoadQueue(false);
+    loader.addEventListener("fileload", handleFileLoad);
+    loader.addEventListener("complete", handleComplete);
+    loader.loadManifest(manifest);
+    
+    this.document.onkeydown = keyPressed;
+    this.document.onkeyup = keyUp;
+}
+
+function keyUp(event) {
+    lastkeyPressed = NONE_PRESSED;
+}
+
+function keyPressed(event) {
+    lastkeyPressed = event.keyCode;
+}
+
+function handleTick(event) {
+    switch(lastkeyPressed) {
+        case KEYCODE_LEFT:
+        if (player.x >= 5)
+            player.x -= 5;
+        break;
+        case KEYCODE_RIGHT:
+        if (player.x <= canvas.width/2)
+            player.x += 5;
+        break;
+        case KEYCODE_UP:
+        if (player.y >= 55)
+            player.y -= 5;
+        break;
+        case KEYCODE_DOWN:
+        if (player.y <= canvas.height)
+            player.y += 5;
+        break;
+    }
+    
+    stage.update();
+    //console.log("tick");
+    
+    e1.update();
+    h1.update();
+}
+
+function setupEnemies() {
+    e1 = new Enemy(4.5);
+    h1 = new Heart(6);
+    
+    stage.addChild(e1);
+    stage.addChild(h1);
+}
+
+function handleFileLoad(evt) {
+	if (evt.item.type == "image") { images[evt.item.id] = evt.result; }
+}
+
+function handleComplete() {
+	exportRoot = new lib.dream();
+
+    player = exportRoot.player;
+    
+	stage = new createjs.Stage(canvas);
+	stage.addChild(exportRoot);
+	stage.update();
+	stage.enableMouseOver();
+
+	createjs.Ticker.setFPS(30);
+    createjs.Ticker.addEventListener("tick", handleTick);
+    
+    setupEnemies();
+}
+</script>
+</head>
+
+<body onload="init();" style="background-color:#D4D4D4">
+	<canvas id="canvas" width="550" height="400" style="background-color:#ffffff"></canvas>
+</body>
+</html>
